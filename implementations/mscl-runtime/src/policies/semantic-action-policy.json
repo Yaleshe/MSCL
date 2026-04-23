@@ -1,0 +1,90 @@
+{
+  "policy_id": "semantic_action_policy",
+  "version": "0.2.0",
+  "constants": {
+    "supported_type": "send_email",
+    "required_category": "communication",
+    "internal_email_domain": "openclaw.local"
+  },
+  "rules": [
+    {
+      "id": "semantic_action_policy.supported_type",
+      "kind": "field_equals",
+      "field": "action_proposal.type",
+      "expected": "send_email",
+      "failure_reason": "This MVP only supports send_email."
+    },
+    {
+      "id": "semantic_action_policy.category_is_communication",
+      "kind": "field_equals",
+      "field": "action_proposal.normalized.category",
+      "expected": "communication",
+      "failure_reason": "This MVP only supports communication proposals."
+    },
+    {
+      "id": "semantic_action_policy.recipient_present",
+      "kind": "field_nonempty",
+      "field": "action_proposal.raw.to",
+      "failure_reason": "raw.to is required."
+    },
+    {
+      "id": "semantic_action_policy.normalized_target_matches_raw",
+      "kind": "field_matches_context",
+      "field": "action_proposal.normalized.target",
+      "context_key": "derived_target",
+      "failure_reason_template": "normalized.target={actual} does not match raw recipient classification {expected}."
+    },
+    {
+      "id": "semantic_action_policy.actor_authorized",
+      "kind": "any_of",
+      "branches": [
+        {
+          "all": [
+            {
+              "kind": "field_equals",
+              "field": "actor.role",
+              "expected": "operator"
+            }
+          ]
+        },
+        {
+          "all": [
+            {
+              "kind": "field_equals",
+              "field": "actor.role",
+              "expected": "system"
+            },
+            {
+              "kind": "field_equals",
+              "field": "action_proposal.normalized.target",
+              "expected": "internal"
+            }
+          ]
+        }
+      ],
+      "failure_reason": "Only operators may send external email in this MVP."
+    },
+    {
+      "id": "semantic_action_policy.high_risk_external_requires_operator",
+      "kind": "forbid_all",
+      "conditions": [
+        {
+          "kind": "field_equals",
+          "field": "action_proposal.normalized.target",
+          "expected": "external"
+        },
+        {
+          "kind": "field_equals",
+          "field": "action_proposal.normalized.risk_level",
+          "expected": "high"
+        },
+        {
+          "kind": "field_not_equals",
+          "field": "actor.role",
+          "expected": "operator"
+        }
+      ],
+      "failure_reason": "High-risk external communication requires an operator."
+    }
+  ]
+}
