@@ -1,32 +1,14 @@
 # Agent Action Firewall
 
-A scenario example built on top of the MSCL runtime.
+A domain scenario demonstrating how MSCL governs email actions before execution.
 
 ---
 
-## What This Shows
+## Scenario
 
-An AI agent wants to act.
+An AI agent attempts to send an email.
 
-This system decides whether that action is allowed before execution.
-
-Without a control layer:
-
-`Agent → Action → Execution`
-
-With MSCL:
-
-`Agent → ActionProposal → Decision → Execution`
-
----
-
-## The Scenario
-
-The example action is:
-
-`send_email`
-
-The system evaluates whether the action should be allowed based on:
+The system evaluates whether the action is allowed based on:
 
 - target (internal vs external)  
 - risk level  
@@ -34,30 +16,62 @@ The system evaluates whether the action should be allowed based on:
 
 ---
 
+## Policy Example
+
+- Internal email → allowed  
+- External email → requires approval  
+- External + sensitive content → denied  
+
+---
+
 ## Example Outcomes
 
-Allowed:
-send_email(to=internal) → Decision: ALLOW → executed
-Blocked:
-send_email(to=external, contains_sensitive_data) → Decision: DENY → blocked
-No control layer:
-send_email(...) → executed directly
+### Allowed
+
+send_email(to=internal)→ APPROVED → executed
 
 ---
 
-## Why This Matters
+### Blocked
 
-Most agent systems today follow:
-
-`do → fix`
-
-This scenario demonstrates:
-
-`validate → then do`
-
-The key idea is introducing a control boundary between intent and execution.
+send_email(to=external, contains_sensitive_data)→ DENIED → not executed
 
 ---
+
+## What This Scenario Demonstrates
+
+This scenario shows how MSCL applies a control boundary:ActionProposal → Decision → Execution
+
+
+Execution only occurs when explicitly allowed.
+
+---
+
+## How to Run
+
+See runtime:implementations/mscl-runtime/
+
+Then test:
+
+curl -X POST http://127.0.0.1:8787/proposals \
+  -H "Content-Type: application/json" \
+  --data '{
+    "id": "ap-001",
+    "actor": { "id": "user-001", "role": "operator" },
+    "action_proposal": {
+      "type": "send_email",
+      "raw": {
+        "to": "external@client.com",
+        "subject": "Contract update"
+      },
+      "normalized": {
+        "category": "communication",
+        "target": "external",
+        "risk_level": "high"
+      }
+    }
+  }'
+
 
 ## How It Connects to MSCL
 
