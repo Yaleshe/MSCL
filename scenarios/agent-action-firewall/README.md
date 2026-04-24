@@ -52,7 +52,7 @@ Execution only occurs when explicitly allowed.
 See runtime:implementations/mscl-runtime/
 
 Then test:
-
+```
 curl -X POST http://127.0.0.1:8787/proposals \
   -H "Content-Type: application/json" \
   --data '{
@@ -71,7 +71,7 @@ curl -X POST http://127.0.0.1:8787/proposals \
       }
     }
   }'
-
+```
 
 ## How It Connects to MSCL
 

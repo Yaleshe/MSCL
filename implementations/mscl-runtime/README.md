@@ -119,7 +119,7 @@ execution = not performed
 Example
 
 Submit an action:
-
+```
 curl -X POST http://127.0.0.1:8787/proposals \
   -H 'content-type: application/json' \
   --data '{
@@ -138,7 +138,7 @@ curl -X POST http://127.0.0.1:8787/proposals \
       }
     }
   }'
-
+```
 ## Local Testing Note
 
 If you use a local HTTP proxy, bypass it for localhost when testing.Otherwise, requests to 127.0.0.1 may fail with a 502 Bad Gateway error.
